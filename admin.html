@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div id="adminLogin" class="box active">
+      <h2>Admin Login</h2>
+      <input type="text" id="adminId" placeholder="Admin ID" />
+      <input type="password" id="adminPass" placeholder="Password" />
+      <button onclick="adminLogin()">Login</button>
+    </div>
+
+    <div id="adminPanel" class="box">
+      <h2>Manage Products</h2>
+      <input id="prodName" placeholder="Product Name" />
+      <input id="prodPrice" placeholder="Price" />
+      <input id="prodImg" placeholder="Image URL" />
+      <button onclick="addProduct()">Add Product</button>
+
+      <div id="productList" class="grid"></div>
+
+      <h2>Orders</h2>
+      <div id="adminOrders"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
 
