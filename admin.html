@@ -3,50 +3,59 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Panel - Hostel Vending</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Hostel Vending — Admin</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Admin Panel</div>
+    <div class="brand">Hostel Vending — Admin</div>
     <nav>
-      <div id="auth-area" class="auth-area">
-        <div id="login-form" class="login-form">
-          <input id="admin-id" placeholder="Admin ID" />
-          <input id="admin-pass" placeholder="Password" type="password" />
-          <button id="admin-login" class="btn small">Login</button>
-        </div>
-        <div id="admin-actions" class="hidden">
-          <button id="admin-logout" class="btn small">Logout</button>
-        </div>
-      </div>
+      <button id="to-customer" class="btn outline small">Customer</button>
     </nav>
   </header>
 
-  <main class="container admin-container">
-    <section class="admin-grid-wrap">
-      <h2>Manage Vending Slots (A1 - G6)</h2>
-      <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <button id="export-data" class="btn">Export Data</button>
-        <input id="import-file" type="file" accept=".json" />
-        <button id="reset-defaults" class="btn">Reset Defaults</button>
+  <main class="container admin-main">
+    <section class="admin-login-card" id="admin-login-card">
+      <h2>Admin Login</h2>
+      <input id="admin-id" placeholder="Admin ID" />
+      <input id="admin-pass" type="password" placeholder="Password" />
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+        <button id="admin-login" class="btn primary">Login</button>
       </div>
-      <div id="admin-grid" class="admin-grid"></div>
+      <p class="muted small">Change admin credentials in <code>app.js</code> before production.</p>
+      <p id="admin-msg" class="muted small"></p>
     </section>
 
-    <section class="orders-wrap">
-      <h2>Orders</h2>
-      <div id="orders-list" class="orders-list"></div>
+    <section id="admin-panel" class="hidden">
+      <div class="admin-top">
+        <h3>Manage Slots</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="export-btn" class="btn">Export Items</button>
+          <input id="import-file" type="file" accept=".json" />
+          <button id="reset-btn" class="btn">Reset Defaults</button>
+          <button id="admin-logout" class="btn outline">Logout</button>
+        </div>
+      </div>
+
+      <div id="admin-grid" class="admin-grid"></div>
+
+      <hr />
+
+      <div class="orders-admin">
+        <h3>All Orders</h3>
+        <div id="orders-list" class="orders-list"></div>
+      </div>
     </section>
   </main>
 
   <footer class="footer">
-    <p>Admin-only area — change admin credentials in app.js before deploy.</p>
+    <p class="muted">Admin edits are stored locally in browser. Export & import JSON for persistence across devices.</p>
   </footer>
 
   <script src="app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => { initAdminView(); });
+    document.getElementById('to-customer').addEventListener('click', ()=> { window.location.href = '/'; });
+    document.addEventListener('DOMContentLoaded', () => { initAdminUI(); });
   </script>
 </body>
 </html>
