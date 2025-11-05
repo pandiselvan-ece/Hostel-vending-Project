@@ -3,32 +3,71 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hostel Vending Delivery — Order</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Hostel Vending Delivery — Customer</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">Hostel Vending Delivery</div>
     <nav>
-      <a href="/admin.html" class="btn small">Admin / Delivery</a>
+      <button id="to-admin" class="btn outline small">Admin</button>
+      <div id="user-area" class="user-area hidden">
+        <span id="welcome-user" class="muted"></span>
+        <button id="logout-user" class="btn small">Logout</button>
+      </div>
     </nav>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Order from vending machine — Delivered to your room</h1>
-      <p class="muted">Ground floor vending • Delivery across 7 floors</p>
-      <div class="cta-row">
-        <a href="#grid" class="btn primary large">Order Now</a>
+  <!-- AUTH / REGISTER -->
+  <main class="container" id="auth-container">
+    <section class="auth-card">
+      <h2>Welcome — Sign in to order</h2>
+      <div class="tabs">
+        <button id="tab-login" class="tab active">Login</button>
+        <button id="tab-register" class="tab">Register</button>
       </div>
-    </section>
 
-    <section id="grid" class="grid-section">
-      <div id="vending-grid" class="grid"></div>
+      <div id="login-form" class="form">
+        <input id="login-username" placeholder="Username" />
+        <input id="login-password" type="password" placeholder="Password" />
+        <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px">
+          <button id="login-btn" class="btn primary">Login</button>
+        </div>
+        <p id="login-msg" class="muted small"></p>
+      </div>
+
+      <div id="register-form" class="form hidden">
+        <input id="reg-username" placeholder="Choose a username" />
+        <input id="reg-password" type="password" placeholder="Choose a password (min 4 chars)" />
+        <input id="reg-room" placeholder="Room number (e.g. 402A)" />
+        <input id="reg-phone" placeholder="Phone number (10 digits)" />
+        <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px">
+          <button id="register-btn" class="btn primary">Register</button>
+        </div>
+        <p id="reg-msg" class="muted small"></p>
+      </div>
     </section>
   </main>
 
-  <!-- Order Modal -->
+  <!-- USER DASHBOARD (hidden until login) -->
+  <main class="container hidden" id="user-dashboard">
+    <section class="hero">
+      <h1>Hello, <span id="user-display-name"></span></h1>
+      <p class="muted">Order items from the ground-floor vending machine. We will call the customer to confirm before delivery.</p>
+    </section>
+
+    <section class="grid-section">
+      <h3>Vending Machine — Slots A1 to G6</h3>
+      <div id="vending-grid" class="grid"></div>
+    </section>
+
+    <section class="orders-section">
+      <h3>Your Orders</h3>
+      <div id="my-orders" class="orders-list"></div>
+    </section>
+  </main>
+
+  <!-- ORDER MODAL -->
   <div id="order-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-card">
       <button class="close" id="closeOrder">&times;</button>
@@ -38,18 +77,12 @@
         <p id="order-slot" class="muted"></p>
         <p id="order-price" class="price"></p>
 
-        <div class="form-group"><input id="customer-name" placeholder="Your name" /></div>
-        <div class="form-group"><input id="room-number" placeholder="Room number (e.g. 402A)" /></div>
-        <div class="form-group"><input id="contact" placeholder="Phone number (10 digits)" /></div>
-
-        <div class="form-group otp-row">
-          <button id="send-otp" class="btn">Send OTP</button>
-          <input id="otp-input" placeholder="Enter OTP" maxlength="6" />
-        </div>
+        <div class="form-group"><input id="order-room" placeholder="Your room number" /></div>
+        <div class="form-group"><input id="order-phone" placeholder="Phone number for callback (10 digits)" /></div>
 
         <div class="actions">
-          <button id="confirm-order" class="btn primary">Confirm Order</button>
-          <button id="cancel-order" class="btn">Cancel</button>
+          <button id="place-order-btn" class="btn primary">Place Order (we will call)</button>
+          <button id="cancel-order-btn" class="btn">Cancel</button>
         </div>
         <p id="order-msg" class="muted small"></p>
       </div>
@@ -57,12 +90,15 @@
   </div>
 
   <footer class="footer">
-    <p>Demo MVP — static version (no backend). Use Admin page to edit items & images.</p>
+    <p class="muted">Demo static MVP — data stored locally. For real deployments use a backend for secure auth & storage.</p>
   </footer>
 
   <script src="app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => { initCustomerView(); });
+    // attach simple nav to admin
+    document.getElementById('to-admin').addEventListener('click', ()=> { window.location.href = '/admin.html'; });
+    // init auth UI
+    document.addEventListener('DOMContentLoaded', () => { initAuthUI(); });
   </script>
 </body>
 </html>
