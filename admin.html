@@ -1,61 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hostel Vending — Admin</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Control Panel</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <header class="topbar">
-    <div class="brand">Hostel Vending — Admin</div>
-    <nav>
-      <button id="to-customer" class="btn outline small">Customer</button>
-    </nav>
-  </header>
+<body class="admin-page">
+  <div class="admin-login" id="adminLoginBox">
+    <h2>Admin Login</h2>
+    <input type="text" id="adminId" placeholder="Admin ID">
+    <input type="password" id="adminPass" placeholder="Password">
+    <button onclick="adminLogin()">Login</button>
+    <p id="adminMsg"></p>
+  </div>
 
-  <main class="container admin-main">
-    <section class="admin-login-card" id="admin-login-card">
-      <h2>Admin Login</h2>
-      <input id="admin-id" placeholder="Admin ID" />
-      <input id="admin-pass" type="password" placeholder="Password" />
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
-        <button id="admin-login" class="btn primary">Login</button>
-      </div>
-      <p class="muted small">Change admin credentials in <code>app.js</code> before production.</p>
-      <p id="admin-msg" class="muted small"></p>
-    </section>
+  <div id="adminPanel" style="display:none;">
+    <h2>Product Management</h2>
+    <div class="add-product">
+      <input type="text" id="pName" placeholder="Product Name" />
+      <input type="number" id="pPrice" placeholder="Price (₹)" />
+      <input type="file" id="pImage" accept="image/*" />
+      <button onclick="addProduct()">Add Product</button>
+    </div>
 
-    <section id="admin-panel" class="hidden">
-      <div class="admin-top">
-        <h3>Manage Slots</h3>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button id="export-btn" class="btn">Export Items</button>
-          <input id="import-file" type="file" accept=".json" />
-          <button id="reset-btn" class="btn">Reset Defaults</button>
-          <button id="admin-logout" class="btn outline">Logout</button>
-        </div>
-      </div>
+    <div class="product-container" id="adminProducts"></div>
+  </div>
 
-      <div id="admin-grid" class="admin-grid"></div>
-
-      <hr />
-
-      <div class="orders-admin">
-        <h3>All Orders</h3>
-        <div id="orders-list" class="orders-list"></div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <p class="muted">Admin edits are stored locally in browser. Export & import JSON for persistence across devices.</p>
-  </footer>
-
-  <script src="app.js"></script>
-  <script>
-    document.getElementById('to-customer').addEventListener('click', ()=> { window.location.href = '/'; });
-    document.addEventListener('DOMContentLoaded', () => { initAdminUI(); });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
