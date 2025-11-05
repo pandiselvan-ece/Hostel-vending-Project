@@ -1,36 +1,628 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hostel Delivery Login</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hostel Vending Delivery — Demo MVP</title>
+  <style>
+    /* ---------- Colors & base ---------- */
+    :root{
+      --bg:#f6fbff;
+      --card:#ffffff;
+      --muted:#627d98;
+      --accent:#ff6b6b;
+      --accent-2:#5b21b6;
+      --success:#16a34a;
+      --danger:#ef4444;
+      --glass: rgba(91,33,182,0.06);
+      --radius:12px;
+      --shadow: 0 12px 40px rgba(16,24,40,0.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg,#e6f2ff 0%, #f9fbff 100%);
+      color:#0f1724; -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+    }
+
+    /* topbar */
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;padding:12px 20px;
+      background:transparent;border-bottom:1px solid rgba(15,23,36,0.04);
+    }
+    .brand{font-weight:800;color:var(--accent-2);font-size:18px}
+    .nav-right{display:flex;gap:8px;align-items:center}
+
+    /* button */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700;
+      transition: transform .14s ease, box-shadow .14s;
+      background:transparent;color:var(--accent-2);
+    }
+    .btn:hover{transform:translateY(-3px)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;box-shadow:0 8px 30px rgba(91,33,182,0.08)}
+    .btn.ghost{background:transparent;border:1px solid rgba(15,23,36,0.06);color:var(--accent-2)}
+    .small{padding:6px 8px;font-size:13px}
+
+    /* layout */
+    .container{max-width:1100px;margin:22px auto;padding:0 18px}
+    .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+
+    /* cards */
+    .card{
+      background:var(--card);border-radius:10px;padding:12px;text-align:center;box-shadow:var(--shadow);border:1px solid rgba(15,23,36,0.03);
+      transition: transform .16s ease;
+    }
+    .card:hover{transform:translateY(-8px)}
+    .card img{width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px}
+    .slot{font-weight:800;color:var(--accent-2);font-size:13px}
+    .item-name{font-weight:800;margin:6px 0}
+    .price{color:var(--accent);font-weight:800}
+
+    /* auth & dashboard */
+    .auth-panel{
+      background:var(--card);border-radius:12px;padding:18px;max-width:480px;margin:26px auto;box-shadow:var(--shadow);
+    }
+    .tabs{display:flex;gap:8px;border-radius:10px;margin-bottom:12px}
+    .tab{flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(15,23,36,0.04);cursor:pointer;font-weight:700}
+    .tab.active{background:linear-gradient(90deg, rgba(91,33,182,0.06), rgba(255,107,107,0.06));color:var(--accent-2);border:none}
+
+    input[type="text"], input[type="password"], input[type="tel"], input[type="number"]{
+      width:100%;padding:10px;border-radius:8px;border:1px solid rgba(15,23,36,0.06);margin:8px 0;background:transparent;outline:none;
+    }
+
+    /* modal (order) */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);z-index:60}
+    .modal.open{display:flex}
+    .modal-card{width:420px;background:var(--card);border-radius:12px;padding:18px;box-shadow:0 30px 80px rgba(2,6,23,0.6);position:relative;animation:pop 240ms cubic-bezier(.2,.9,.3,1)}
+    .modal-card img{width:160px;height:120px;object-fit:cover;border-radius:10px;display:block;margin:0 auto 8px}
+    .close-x{position:absolute;right:12px;top:8px;border:none;background:none;font-size:22px;cursor:pointer}
+
+    @keyframes pop{from{transform:translateY(8px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+
+    /* admin layout */
+    .admin-panel{display:none}
+    .admin-panel.open{display:block}
+    .admin-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .admin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+
+    .admin-card{background:linear-gradient(180deg, rgba(91,33,182,0.03), transparent);padding:12px;border-radius:10px;border:1px solid rgba(91,33,182,0.06);box-shadow:var(--shadow)}
+    .admin-card img{width:100%;height:110px;object-fit:cover;border-radius:8px;margin-top:8px}
+
+    .orders-list{max-height:420px;overflow:auto;padding:6px}
+    .order-item{background:var(--card);padding:10px;border-radius:10px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center}
+    .order-item img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+
+    /* responsive */
+    @media (max-width:980px){ .grid{grid-template-columns:repeat(3,1fr)} .admin-grid{grid-template-columns:repeat(1,1fr)} .modal-card{width:92%} }
+    @media (max-width:540px){ .grid{grid-template-columns:repeat(2,1fr)} .brand{font-size:16px} }
+
+    /* helper styles */
+    .muted{color:var(--muted)}
+    .center{display:flex;justify-content:center;align-items:center}
+    .gap{gap:8px}
+    .label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    code{background:rgba(2,6,23,0.03);padding:2px 6px;border-radius:6px}
+  </style>
 </head>
-<body class="login-page">
-  <div class="login-container">
-    <h1>Hostel Delivery System</h1>
-
-    <div class="tab-buttons">
-      <button id="loginTab" class="active">Login</button>
-      <button id="registerTab">Register</button>
+<body>
+  <header class="topbar">
+    <div class="brand">Hostel Vending Delivery</div>
+    <div class="nav-right">
+      <button id="btn-dashboard" class="btn small">Dashboard</button>
+      <button id="btn-admin" class="btn ghost small">Admin</button>
+      <div id="user-area" style="display:none" class="gap">
+        <span id="user-welcome" class="muted"></span>
+        <button id="logoutBtn" class="btn">Logout</button>
+      </div>
     </div>
+  </header>
 
-    <div id="loginForm">
-      <input type="text" id="loginName" placeholder="Enter Username" />
-      <input type="password" id="loginPass" placeholder="Enter Password" />
-      <button onclick="loginUser()">Login</button>
+  <main class="container" id="app">
+    <!-- AUTH PANEL -->
+    <section class="auth-panel" id="authPanel" aria-live="polite">
+      <h2 style="margin:0 0 8px">Welcome — Sign in to order</h2>
+      <div class="tabs" role="tablist">
+        <button id="tabLogin" class="tab active" role="tab">Login</button>
+        <button id="tabRegister" class="tab" role="tab">Register</button>
+      </div>
+
+      <div id="loginBox">
+        <label class="label">Username</label>
+        <input id="loginUser" type="text" placeholder="username" />
+        <label class="label">Password</label>
+        <input id="loginPass" type="password" placeholder="password" />
+        <div class="center" style="margin-top:10px">
+          <button id="loginBtn" class="btn primary">Login</button>
+        </div>
+        <p id="loginMsg" class="muted" style="margin-top:8px"></p>
+      </div>
+
+      <div id="registerBox" style="display:none">
+        <label class="label">Choose a username</label>
+        <input id="regUser" type="text" placeholder="username" />
+        <label class="label">Password (min 4 chars)</label>
+        <input id="regPass" type="password" placeholder="password" />
+        <label class="label">Room (optional)</label>
+        <input id="regRoom" type="text" placeholder="e.g. 402A" />
+        <label class="label">Phone (10 digits)</label>
+        <input id="regPhone" type="tel" placeholder="phone number" />
+        <div class="center" style="margin-top:10px">
+          <button id="regBtn" class="btn primary">Register & Login</button>
+        </div>
+        <p id="regMsg" class="muted" style="margin-top:8px"></p>
+      </div>
+    </section>
+
+    <!-- DASHBOARD (hidden until login) -->
+    <section id="dashboard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0">Hello, <span id="displayName"></span></h3>
+          <div class="muted">Order from slots A1–G6. We will call the phone number you provide to confirm delivery.</div>
+        </div>
+        <div class="center gap">
+          <button id="refreshProducts" class="btn ghost small">Refresh</button>
+          <button id="openAdminFromDash" class="btn ghost small">Admin</button>
+        </div>
+      </div>
+
+      <h4 style="margin:8px 0">Vending Machine</h4>
+      <div id="productGrid" class="grid" aria-live="polite"></div>
+
+      <h4 style="margin:18px 0 8px">Your Orders</h4>
+      <div id="myOrders" class="orders-list"></div>
+    </section>
+
+    <!-- ADMIN PANEL (modal-like inside page) -->
+    <section id="adminSection" class="admin-panel" style="margin-top:18px">
+      <div class="admin-top">
+        <div>
+          <h3 style="margin:0">Admin Control</h3>
+          <div class="muted">Edit slots (A1–G6), upload images, export/import data, manage orders.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="exportBtn" class="btn ghost small">Export items</button>
+          <input id="importFile" type="file" accept=".json" />
+          <button id="resetBtn" class="btn ghost small">Reset defaults</button>
+          <button id="closeAdminPanel" class="btn">Close Admin</button>
+        </div>
+      </div>
+
+      <div id="adminGrid" class="admin-grid"></div>
+
+      <hr style="margin:18px 0" />
+      <h4 style="margin:8px 0">All Orders</h4>
+      <div id="ordersAdmin" class="orders-list"></div>
+    </section>
+  </main>
+
+  <!-- ORDER MODAL -->
+  <div id="orderModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card" role="document">
+      <button id="closeModal" class="close-x" aria-label="close">&times;</button>
+      <img id="modalImg" src="" alt="product image" />
+      <h3 id="modalTitle" style="text-align:center;margin:6px 0"></h3>
+      <p id="modalSlot" class="muted" style="text-align:center;margin:2px 0"></p>
+      <div style="margin-top:8px">
+        <label class="label">Phone for verification (10 digits)</label>
+        <input id="orderPhone" type="tel" placeholder="e.g. 9876543210" />
+        <label class="label" style="margin-top:8px">Room (optional)</label>
+        <input id="orderRoom" type="text" placeholder="e.g. 402A" />
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+        <button id="confirmOrderBtn" class="btn primary">Place Order (we will call)</button>
+        <button id="cancelOrderBtn" class="btn">Cancel</button>
+      </div>
+      <p id="orderFeedback" class="muted" style="text-align:center;margin-top:8px"></p>
     </div>
-
-    <div id="registerForm" style="display:none;">
-      <input type="text" id="regName" placeholder="Create Username" />
-      <input type="password" id="regPass" placeholder="Create Password" />
-      <button onclick="registerUser()">Register</button>
-    </div>
-
-    <p id="loginMsg"></p>
-    <a href="admin.html" class="admin-link">Admin Login</a>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // ---------- CONFIG - change admin credentials before deploy ----------
+    const ADMIN_ID = "admin";     // change this
+    const ADMIN_PASS = "admin123"; // change this
+
+    // ---------- Storage keys ----------
+    const LS_USERS = 'hv_users_v2';
+    const LS_ITEMS = 'hv_items_v2';
+    const LS_ORDERS = 'hv_orders_v2';
+
+    // ---------- Slots ----------
+    const rows = ["A","B","C","D","E","F","G"];
+    const cols = [1,2,3,4,5,6];
+    const allSlots = []; rows.forEach(r => cols.forEach(c => allSlots.push(r + c)));
+
+    // ---------- Helpers ----------
+    function save(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
+    function load(key, fallback){ const raw = localStorage.getItem(key); if(!raw){ save(key, fallback); return fallback; } try { return JSON.parse(raw); } catch(e){ save(key, fallback); return fallback; } }
+    function uid(){ return 'id_' + Math.random().toString(36).slice(2,9); }
+    function base64Placeholder(text, w=800,h=500){ const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'><rect width='100%' height='100%' fill='#f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='#9ca3af'>${text}</text></svg>`; return 'data:image/svg+xml;base64,' + btoa(svg); }
+
+    // ---------- Default Items ----------
+    function defaultItems(){
+      const out = {};
+      allSlots.forEach(s => out[s] = { slot:s, name: 'Empty Slot', price:'', img: base64Placeholder(s) });
+      // sample few
+      out['A1'].name='Lays (Small)'; out['A1'].price='20';
+      out['A2'].name='Coke 300ml'; out['A2'].price='35';
+      out['A3'].name='Biscuits'; out['A3'].price='15';
+      return out;
+    }
+
+    // ---------- Ensure defaults exist ----------
+    (function ensureInit(){
+      load(LS_USERS, {}); load(LS_ITEMS, defaultItems()); load(LS_ORDERS, []);
+    })();
+
+    // ---------- AUTH UI wiring ----------
+    document.addEventListener('DOMContentLoaded', ()=> {
+      // tabs
+      const tabLogin = document.getElementById('tabLogin');
+      const tabRegister = document.getElementById('tabRegister');
+      const loginBox = document.getElementById('loginBox');
+      const registerBox = document.getElementById('registerBox');
+      tabLogin.addEventListener('click', ()=> { tabLogin.classList.add('active'); tabRegister.classList.remove('active'); loginBox.style.display='block'; registerBox.style.display='none';});
+      tabRegister.addEventListener('click', ()=> { tabRegister.classList.add('active'); tabLogin.classList.remove('active'); registerBox.style.display='block'; loginBox.style.display='none';});
+
+      // auth actions
+      document.getElementById('loginBtn').addEventListener('click', handleLogin);
+      document.getElementById('regBtn').addEventListener('click', handleRegister);
+
+      // top nav
+      document.getElementById('btn-dashboard').addEventListener('click', ()=> {
+        const active = sessionStorage.getItem('hv_user');
+        if(active) showDashboard(); else document.getElementById('authPanel').scrollIntoView({behavior:'smooth'});
+      });
+      document.getElementById('btn-admin').addEventListener('click', ()=> { openAdminLogin(); });
+      document.getElementById('logoutBtn').addEventListener('click', ()=> { sessionStorage.removeItem('hv_user'); updateUI(); });
+
+      // admin open from dash
+      document.getElementById('openAdminFromDash').addEventListener('click', openAdminLogin);
+
+      // order modal
+      document.getElementById('cancelOrderBtn').addEventListener('click', closeOrderModal);
+      document.getElementById('closeModal').addEventListener('click', closeOrderModal);
+      document.getElementById('confirmOrderBtn').addEventListener('click', confirmPlaceOrder);
+
+      // admin controls
+      document.getElementById('exportBtn').addEventListener('click', exportItems);
+      document.getElementById('importFile').addEventListener('change', importItems);
+      document.getElementById('resetBtn').addEventListener('click', ()=> { if(confirm('Reset all slots to defaults?')) { save(LS_ITEMS, defaultItems()); renderProducts(); renderAdminGrid(); alert('Reset done'); } });
+
+      // refresh products
+      document.getElementById('refreshProducts').addEventListener('click', ()=> { renderProducts(); });
+
+      // initial UI
+      updateUI();
+    });
+
+    // ---------- AUTH HANDLERS ----------
+    function handleRegister(){
+      const u = document.getElementById('regUser').value.trim();
+      const p = document.getElementById('regPass').value;
+      const room = document.getElementById('regRoom').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const msg = document.getElementById('regMsg'); msg.textContent='';
+      if(!u || !p) { msg.textContent='Fill username and password'; return; }
+      if(p.length < 4) { msg.textContent='Password must be at least 4 chars'; return; }
+      if(phone && !/^\d{10}$/.test(phone)) { msg.textContent='Phone must be 10 digits'; return; }
+      const users = load(LS_USERS, {});
+      if(users[u]) { msg.textContent='Username taken'; return; }
+      users[u] = { username:u, password:p, room: room || '', phone: phone || '' };
+      save(LS_USERS, users);
+      sessionStorage.setItem('hv_user', u);
+      // clear fields
+      document.getElementById('regUser').value=''; document.getElementById('regPass').value=''; document.getElementById('regPhone').value=''; document.getElementById('regRoom').value='';
+      showDashboard();
+    }
+
+    function handleLogin(){
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value;
+      const msg = document.getElementById('loginMsg'); msg.textContent='';
+      if(!u || !p) { msg.textContent='Enter username and password'; return; }
+      const users = load(LS_USERS, {});
+      if(!users[u] || users[u].password !== p){ msg.textContent='Invalid credentials'; return; }
+      sessionStorage.setItem('hv_user', u);
+      document.getElementById('loginUser').value=''; document.getElementById('loginPass').value='';
+      showDashboard();
+    }
+
+    function updateUI(){
+      const active = sessionStorage.getItem('hv_user');
+      const userArea = document.getElementById('user-area');
+      if(active){
+        userArea.style.display='flex';
+        document.getElementById('user-welcome').textContent = active;
+        document.getElementById('authPanel').style.display='none';
+        showDashboard();
+      } else {
+        userArea.style.display='none';
+        document.getElementById('authPanel').style.display='block';
+        document.getElementById('dashboard').style.display='none';
+        closeOrderModal();
+        document.getElementById('adminSection').style.display='none';
+      }
+    }
+
+    function showDashboard(){
+      const user = sessionStorage.getItem('hv_user');
+      if(!user) { updateUI(); return; }
+      document.getElementById('displayName').textContent = user;
+      document.getElementById('authPanel').style.display='none';
+      document.getElementById('dashboard').style.display='block';
+      document.getElementById('adminSection').style.display='none';
+      renderProducts();
+      renderUserOrders();
+    }
+
+    // ---------- PRODUCTS & RENDER ----------
+    function getItemsObj(){ return load(LS_ITEMS, defaultItems()); }
+    function saveItemsObj(obj){ save(LS_ITEMS, obj); }
+
+    function renderProducts(){
+      const grid = document.getElementById('productGrid'); grid.innerHTML='';
+      const itemsObj = getItemsObj();
+      const keys = Object.keys(itemsObj).sort();
+      keys.forEach(slot => {
+        const it = itemsObj[slot];
+        const card = document.createElement('div'); card.className='card';
+        card.innerHTML = `<div class="slot">${slot}</div>
+                          <img src="${it.img}" alt="${escapeHtml(it.name)}" />
+                          <div class="item-name">${escapeHtml(it.name)}</div>
+                          <div class="price">${it.price ? '₹'+escapeHtml(it.price) : '-'}</div>
+                          <div style="margin-top:8px"><button class="btn" data-slot="${slot}">Buy</button></div>`;
+        grid.appendChild(card);
+      });
+      // attach buy handlers
+      grid.querySelectorAll('button[data-slot]').forEach(b => b.addEventListener('click', e => {
+        const slot = e.currentTarget.getAttribute('data-slot');
+        openOrderModal(slot);
+      }));
+    }
+
+    // ---------- ORDER FLOW ----------
+    let currentOrderSlot = null;
+    function openOrderModal(slot){
+      currentOrderSlot = slot;
+      const items = getItemsObj();
+      const it = items[slot];
+      document.getElementById('modalImg').src = it.img;
+      document.getElementById('modalTitle').textContent = it.name + (it.price ? ' — ₹'+it.price : '');
+      document.getElementById('modalSlot').textContent = 'Slot: ' + slot;
+      // prefill phone/room from user profile if available
+      const user = sessionStorage.getItem('hv_user');
+      const users = load(LS_USERS, {});
+      if(user && users[user]){ document.getElementById('orderPhone').value = users[user].phone || ''; document.getElementById('orderRoom').value = users[user].room || ''; }
+      document.getElementById('orderFeedback').textContent = '';
+      document.getElementById('orderModal').classList.add('open');
+    }
+
+    function closeOrderModal(){ document.getElementById('orderModal').classList.remove('open'); currentOrderSlot=null; document.getElementById('orderPhone').value=''; document.getElementById('orderRoom').value=''; }
+
+    function confirmPlaceOrder(){
+      const phone = document.getElementById('orderPhone').value.trim();
+      const room = document.getElementById('orderRoom').value.trim();
+      const user = sessionStorage.getItem('hv_user');
+      if(!user){ document.getElementById('orderFeedback').textContent='You must be logged in'; return; }
+      if(!/^\d{10}$/.test(phone)){ document.getElementById('orderFeedback').textContent='Enter a valid 10-digit phone'; return; }
+      if(!currentOrderSlot){ document.getElementById('orderFeedback').textContent='No item selected'; return; }
+      // create order
+      const items = getItemsObj(); const it = items[currentOrderSlot];
+      const orders = load(LS_ORDERS, []);
+      const order = {
+        id: uid(),
+        username: user,
+        slot: currentOrderSlot,
+        itemName: it.name,
+        price: it.price || '',
+        phone, room: room || '',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+      orders.unshift(order); save(LS_ORDERS, orders);
+      document.getElementById('orderFeedback').textContent = 'Order placed — delivery person will call to confirm.';
+      setTimeout(()=> { closeOrderModal(); renderUserOrders(); renderOrdersAdmin(); }, 900);
+    }
+
+    // ---------- USER ORDERS ----------
+    function renderUserOrders(){
+      const list = document.getElementById('myOrders'); list.innerHTML='';
+      const user = sessionStorage.getItem('hv_user');
+      if(!user) return;
+      const orders = load(LS_ORDERS, []).filter(o => o.username === user);
+      if(orders.length === 0){ list.innerHTML = '<div class="muted">No orders yet</div>'; return; }
+      orders.forEach(o => {
+        const el = document.createElement('div'); el.className='order-item';
+        el.innerHTML = `<img src="${(getItemsObj()[o.slot]||{}).img || base64Placeholder(o.slot)}" />
+                        <div style="flex:1">
+                          <div style="display:flex;justify-content:space-between;align-items:center">
+                            <strong>${escapeHtml(o.itemName)} <span class="muted">(${o.slot})</span></strong>
+                            <span class="muted">${o.price ? '₹'+escapeHtml(o.price) : ''}</span>
+                          </div>
+                          <div class="muted small">${escapeHtml(o.room)} • ${escapeHtml(o.phone)}</div>
+                          <div class="muted small">Status: <strong>${escapeHtml(o.status)}</strong></div>
+                          <div class="muted small">${new Date(o.createdAt).toLocaleString()}</div>
+                        </div>`;
+        list.appendChild(el);
+      });
+    }
+
+    // ---------- ADMIN ----------
+
+    // Show admin login prompt (simple modal like behaviour via prompt for quick access)
+    function openAdminLogin(){
+      const id = prompt('Enter Admin ID:');
+      if(id === null) return;
+      const pass = prompt('Enter Admin Password:');
+      if(pass === null) return;
+      if(id === ADMIN_ID && pass === ADMIN_PASS){ openAdminPanel(); } else { alert('Invalid admin credentials'); }
+    }
+
+    function openAdminPanel(){
+      document.getElementById('adminSection').style.display = 'block';
+      renderAdminGrid();
+      renderOrdersAdmin();
+      // scroll to admin
+      document.getElementById('adminSection').scrollIntoView({behavior:'smooth'});
+    }
+
+    // Render admin grid
+    function renderAdminGrid(){
+      const container = document.getElementById('adminGrid'); container.innerHTML='';
+      const itemsObj = getItemsObj();
+      const keys = Object.keys(itemsObj).sort();
+      keys.forEach(slot => {
+        const it = itemsObj[slot];
+        const card = document.createElement('div'); card.className='admin-card';
+        card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+                            <strong>${slot}</strong>
+                            <div class="muted">${it.price ? '₹'+escapeHtml(it.price) : ''}</div>
+                          </div>
+                          <img src="${it.img}" alt="${escapeHtml(it.name)}" />
+                          <input type="text" data-slot="${slot}" class="admin-name" placeholder="Item name" value="${escapeHtml(it.name)}" />
+                          <input type="text" data-slot="${slot}" class="admin-price" placeholder="Price" value="${escapeHtml(it.price)}" />
+                          <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
+                            <input type="file" data-slot="${slot}" class="admin-file" accept="image/*" />
+                            <button class="btn save-slot" data-slot="${slot}">Save</button>
+                            <button class="btn" style="background:var(--danger);color:#fff" data-slot="${slot}" id="clear-${slot}">Clear</button>
+                          </div>`;
+        container.appendChild(card);
+      });
+
+      // attach handlers
+      container.querySelectorAll('.save-slot').forEach(btn => btn.addEventListener('click', async (e) => {
+        const slot = e.currentTarget.getAttribute('data-slot');
+        const nameInput = container.querySelector(`input.admin-name[data-slot="${slot}"]`);
+        const priceInput = container.querySelector(`input.admin-price[data-slot="${slot}"]`);
+        const fileInput = container.querySelector(`input.admin-file[data-slot="${slot}"]`);
+        const items = getItemsObj();
+        items[slot].name = nameInput.value.trim() || 'Empty Slot';
+        items[slot].price = priceInput.value.trim();
+        if(fileInput && fileInput.files && fileInput.files[0]){
+          try {
+            const dataUrl = await readFileAsDataURL(fileInput.files[0]);
+            items[slot].img = dataUrl;
+          } catch(err){ alert('Image read failed'); }
+        }
+        saveItemsObj(items);
+        alert('Saved ' + slot);
+        renderProducts();
+        renderAdminGrid();
+      }));
+
+      container.querySelectorAll('[id^="clear-"]').forEach(b => b.addEventListener('click', (e) => {
+        const slot = e.currentTarget.id.replace('clear-','');
+        if(!confirm('Clear slot ' + slot + ' ?')) return;
+        const items = getItemsObj();
+        items[slot] = { slot, name:'Empty Slot', price:'', img: base64Placeholder(slot) };
+        saveItemsObj(items);
+        renderProducts();
+        renderAdminGrid();
+      }));
+    }
+
+    // Export / Import items
+    function exportItems(){
+      const items = getItemsObj();
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type:'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'vending-items.json'; a.click(); URL.revokeObjectURL(url);
+    }
+    function importItems(e){
+      const f = e.target.files[0]; if(!f) return;
+      const fr = new FileReader();
+      fr.onload = ()=> {
+        try {
+          const imported = JSON.parse(fr.result);
+          // validate
+          const ok = allSlots.every(s => imported[s] !== undefined);
+          if(!ok) { alert('Invalid items JSON'); return; }
+          saveItemsObj(imported);
+          alert('Imported items');
+          renderProducts(); renderAdminGrid();
+        } catch(err){ alert('Import failed: ' + err.message); }
+      };
+      fr.readAsText(f);
+    }
+
+    // ---------- ORDERS ADMIN ----------
+    function renderOrdersAdmin(){
+      const list = document.getElementById('ordersAdmin'); list.innerHTML='';
+      const orders = load(LS_ORDERS, []);
+      if(orders.length === 0){ list.innerHTML = '<div class="muted">No orders yet</div>'; return; }
+      orders.forEach(o => {
+        const el = document.createElement('div'); el.className='order-item';
+        el.innerHTML = `<img src="${(getItemsObj()[o.slot]||{}).img || base64Placeholder(o.slot)}" />
+                        <div style="flex:1">
+                          <div style="display:flex;justify-content:space-between">
+                            <strong>${escapeHtml(o.itemName)} <span class="muted">(${o.slot})</span></strong>
+                            <span class="muted">${o.price ? '₹'+escapeHtml(o.price) : ''}</span>
+                          </div>
+                          <div class="muted small">${escapeHtml(o.username)} • ${escapeHtml(o.room)} • ${escapeHtml(o.phone)}</div>
+                          <div class="muted small">Status: <strong>${escapeHtml(o.status)}</strong></div>
+                          <div style="margin-top:8px;display:flex;gap:8px">
+                            ${o.status==='pending' ? `<button class="btn" data-act="pick" data-id="${o.id}">Mark Picked</button>` : ''}
+                            ${o.status!=='delivered' ? `<button class="btn" data-act="deliver" data-id="${o.id}">Mark Delivered</button>` : ''}
+                            <button class="btn" data-act="cancel" data-id="${o.id}" style="background:var(--danger);color:#fff">Cancel</button>
+                            <button class="btn" data-act="call" data-id="${o.id}">Call</button>
+                          </div>
+                        </div>`;
+        list.appendChild(el);
+      });
+
+      // attach handlers
+      list.querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', (ev) => {
+        const act = ev.currentTarget.getAttribute('data-act'), id = ev.currentTarget.getAttribute('data-id');
+        handleOrderAction(act, id);
+      }));
+    }
+
+    function handleOrderAction(act, id){
+      const orders = load(LS_ORDERS, []);
+      const idx = orders.findIndex(x => x.id === id);
+      if(idx === -1) return alert('Order not found');
+      if(act === 'pick'){ orders[idx].status = 'picked'; }
+      else if(act === 'deliver'){ orders[idx].status = 'delivered'; }
+      else if(act === 'cancel'){ orders[idx].status = 'cancelled'; }
+      else if(act === 'call'){
+        const phone = orders[idx].phone;
+        if(!/^\d{10}$/.test(phone)) return alert('Invalid phone');
+        window.open('tel:' + phone);
+      }
+      save(LS_ORDERS, orders);
+      renderOrdersAdmin(); renderUserOrders();
+    }
+
+    // ---------- Utilities ----------
+    function escapeHtml(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function readFileAsDataURL(file){ return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = ()=> res(fr.result); fr.onerror = ()=> rej(new Error('file read')); fr.readAsDataURL(file); }); }
+    function uid(){ return 'o' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+    // Expose some functions for debug if needed
+    window.renderProducts = renderProducts;
+    window.renderAdminGrid = renderAdminGrid;
+    window.renderOrdersAdmin = renderOrdersAdmin;
+    window.base64Placeholder = base64Placeholder;
+
+    // final render helpers
+    function renderAdminGrid(){ /* placeholder - overwritten above when DOMContentLoaded */ }
+    function renderProducts(){ /* placeholder - overwritten above when DOMContentLoaded */ }
+
+    // attach global references after DOM ready (ensures functions defined)
+    document.addEventListener('DOMContentLoaded', ()=> {
+      // re-wire the functions declared earlier to ensure they exist
+      renderProducts = window.renderProducts || renderProducts;
+      renderAdminGrid = window.renderAdminGrid || renderAdminGrid;
+      renderOrdersAdmin = window.renderOrdersAdmin || renderOrdersAdmin;
+      // initial product render (if user already logged in)
+      if(sessionStorage.getItem('hv_user')) showDashboard();
+    });
+
+  </script>
 </body>
 </html>
