@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Panel - Hostel Vending</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Admin Panel</div>
+    <nav>
+      <div id="auth-area" class="auth-area">
+        <div id="login-form" class="login-form">
+          <input id="admin-id" placeholder="Admin ID" />
+          <input id="admin-pass" placeholder="Password" type="password" />
+          <button id="admin-login" class="btn small">Login</button>
+        </div>
+        <div id="admin-actions" class="hidden">
+          <button id="admin-logout" class="btn small">Logout</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container admin-container">
+    <section class="admin-grid-wrap">
+      <h2>Manage Vending Slots (A1 - G6)</h2>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button id="export-data" class="btn">Export Data</button>
+        <input id="import-file" type="file" accept=".json" />
+        <button id="reset-defaults" class="btn">Reset Defaults</button>
+      </div>
+      <div id="admin-grid" class="admin-grid"></div>
+    </section>
+
+    <section class="orders-wrap">
+      <h2>Orders</h2>
+      <div id="orders-list" class="orders-list"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Admin-only area — change admin credentials in app.js before deploy.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => { initAdminView(); });
+  </script>
+</body>
+</html>

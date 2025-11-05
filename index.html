@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hostel Vending Delivery — Order</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Hostel Vending Delivery</div>
+    <nav>
+      <a href="/admin.html" class="btn small">Admin / Delivery</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Order from vending machine — Delivered to your room</h1>
+      <p class="muted">Ground floor vending • Delivery across 7 floors</p>
+      <div class="cta-row">
+        <a href="#grid" class="btn primary large">Order Now</a>
+      </div>
+    </section>
+
+    <section id="grid" class="grid-section">
+      <div id="vending-grid" class="grid"></div>
+    </section>
+  </main>
+
+  <!-- Order Modal -->
+  <div id="order-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close" id="closeOrder">&times;</button>
+      <div id="order-card">
+        <img id="order-img" src="" alt="product" />
+        <h3 id="order-name"></h3>
+        <p id="order-slot" class="muted"></p>
+        <p id="order-price" class="price"></p>
+
+        <div class="form-group"><input id="customer-name" placeholder="Your name" /></div>
+        <div class="form-group"><input id="room-number" placeholder="Room number (e.g. 402A)" /></div>
+        <div class="form-group"><input id="contact" placeholder="Phone number (10 digits)" /></div>
+
+        <div class="form-group otp-row">
+          <button id="send-otp" class="btn">Send OTP</button>
+          <input id="otp-input" placeholder="Enter OTP" maxlength="6" />
+        </div>
+
+        <div class="actions">
+          <button id="confirm-order" class="btn primary">Confirm Order</button>
+          <button id="cancel-order" class="btn">Cancel</button>
+        </div>
+        <p id="order-msg" class="muted small"></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Demo MVP — static version (no backend). Use Admin page to edit items & images.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => { initCustomerView(); });
+  </script>
+</body>
+</html>
